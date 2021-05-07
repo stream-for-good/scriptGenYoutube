@@ -1,0 +1,13 @@
+{
+	"type": "conspi", // "neutral" ; "informative"
+	"watchNext": "15",
+	"watchFromURL": "50",
+	"watchFromHome": "10",
+	"search": "conspi", // "neutral" ; "informative"
+	"watchFromSearch": "5",
+	"watchFromChannel": "5",
+	"watchRecommanded": "15",
+	"timeWatching": "full", // "xx" in sec 
+	"social": "like",
+	"order": "random", // {}
+}
