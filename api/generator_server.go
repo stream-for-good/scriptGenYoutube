@@ -24,8 +24,14 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonData, err := gabs.ParseJSON(req)
+	if err != nil {
+		respond(&w, http.StatusInternalServerError, "You must provide a valid JSON as body")
+		return
+	}
+
 	infos := make(map[string]string)
-	jsonData := json.Unmarshal([]byte(req), &infos)
+	getDataFromJSON(jsonData, &infos, &w)
 
 	order := []string{}
 	getSliceFromJSON(jsonData, &order, &w)
