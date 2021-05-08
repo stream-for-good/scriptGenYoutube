@@ -75,6 +75,8 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 	search, _ := strconv.Atoi((*infos)["watchFromSearch"])
 	searches := getSearchAndWatch(search, searchType, social, stopsAt, interractionPercent)
 
+	log.Println("All data formated")
+
 	json, err := writeOrder(order, urls, nexts, recommandeds, homes, channels, searches)
 	if err != nil {
 		log.Println(err)
@@ -87,7 +89,7 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]action, error) {
 
 	rand.Seed(time.Now().UnixNano())
-	urls := []action{}
+	urls := make([]action, n)
 	count := 0
 
 	db, err := sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/gocron")
@@ -121,7 +123,7 @@ func getWatchURL(n int, social string, stopsAt string, interractionPercent int) 
 		urls[count] = action{
 			action:       "watch",
 			url:          "https://www.youtube.com/watch?v=" + id,
-			watchContext: w}
+			watchContext: *w}
 		count++
 	}
 
@@ -131,7 +133,7 @@ func getWatchURL(n int, social string, stopsAt string, interractionPercent int) 
 func getSearchAndWatch(n int, search string, social string, stopsAt string, interractionPercent int) *[]action {
 
 	rand.Seed(time.Now().UnixNano())
-	searches := []action{}
+	searches := make([]action, 2*n)
 
 	for i := 0; i < 2*n; i += 2 {
 
@@ -153,7 +155,7 @@ func getSearchAndWatch(n int, search string, social string, stopsAt string, inte
 		searches[i+1] = action{
 			action:       "watch",
 			index:        strconv.Itoa(index),
-			watchContext: w}
+			watchContext: *w}
 	}
 
 	for s := range searches {
@@ -165,7 +167,7 @@ func getSearchAndWatch(n int, search string, social string, stopsAt string, inte
 
 func getWatchFromChannel(n int, social string, stopsAt string, interractionPercent int) *[]action {
 
-	channels := []action{}
+	channels := make([]action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
@@ -176,14 +178,14 @@ func getWatchFromChannel(n int, social string, stopsAt string, interractionPerce
 		channels[i+1] = action{
 			action:       "watch",
 			index:        strconv.Itoa(index),
-			watchContext: w}
+			watchContext: *w}
 	}
 	return &channels
 }
 
 func getWatchFromHome(n int, social string, stopsAt string, interractionPercent int) *[]action {
 
-	homes := []action{}
+	homes := make([]action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
@@ -194,7 +196,7 @@ func getWatchFromHome(n int, social string, stopsAt string, interractionPercent 
 		homes[i+1] = action{
 			action:       "watch",
 			index:        strconv.Itoa(index),
-			watchContext: w}
+			watchContext: *w}
 	}
 	return &homes
 }
@@ -203,21 +205,25 @@ func getWatchNext(n int, social string, stopsAt string, interractionPercent int)
 
 	log.Println("In watch next function with %d actions", n)
 
-	nexts := []action{}
+	nexts := make([]action, n)
 
 	for i := 0; i < n; i++ {
+		log.Printf("i equal %d", i)
 		w := getWatchContext(social, stopsAt, interractionPercent)
 		nexts[i] = action{
 			action:       "watch",
 			index:        "1",
-			watchContext: w}
+			watchContext: *w}
+		log.Println("action added !")
 	}
+
+	log.Println("Watch next ended !")
 	return &nexts
 }
 
 func getWatchRecommanded(n int, social string, stopsAt string, interractionPercent int) *[]action {
 
-	recommandeds := []action{}
+	recommandeds := make([]action, n)
 	for i := 0; i < n; i++ {
 
 		index := rand.Intn(20) + 1
@@ -226,12 +232,12 @@ func getWatchRecommanded(n int, social string, stopsAt string, interractionPerce
 		recommandeds[i] = action{
 			action:       "watch",
 			index:        strconv.Itoa(index),
-			watchContext: w}
+			watchContext: *w}
 	}
 	return &recommandeds
 }
 
-func getWatchContext(social string, stopsAt string, interractionPercent int) watchContext {
+func getWatchContext(social string, stopsAt string, interractionPercent int) *watchContext {
 
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(101)
@@ -241,10 +247,12 @@ func getWatchContext(social string, stopsAt string, interractionPercent int) wat
 	} else {
 		w = watchContext{stopsAt: stopsAt}
 	}
-	return w
+	return &w
 }
 
 func writeOrder(order *[]string, urls *[]action, nexts *[]action, recommandeds *[]action, homes *[]action, channels *[]action, searches *[]action) ([]byte, error) {
+	log.Println("In write order func")
+
 	actions := []action{}
 	for _, o := range *order {
 		switch o {

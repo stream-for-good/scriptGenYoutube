@@ -13,7 +13,7 @@ func main() {
 
 	http.HandleFunc("/generate", api.Generate)
 
-	err := http.ListenAndServe(":50001", nil)
+	err := http.ListenAndServe(":10001", nil)
 	if err != nil {
 		log.Println("Script Generator service failed to start")
 		log.Fatal(err)
