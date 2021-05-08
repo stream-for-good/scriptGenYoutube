@@ -13,7 +13,7 @@ import (
 
 func Generate(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("New task received...")
+	log.Println("Service Started...")
 
 	req, err := ioutil.ReadAll(r.Body)
 	defer bodyCloser(r.Body)
@@ -37,9 +37,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 
 	err = WriteScript(&infos, &order)
 
-	if err == nil {
-		respond(&w, http.StatusOK, "success")
-	} else {
+	if err != nil {
 		respond(&w, http.StatusInternalServerError, err.Error())
 	}
 }
@@ -50,72 +48,65 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // - infos  : Contains infos passed in the script and that are going to be used to generate scripts
 // - w      : Used to respond error messages to sender in case of malformed JSON
 func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string, w *http.ResponseWriter) bool {
+	log.Println("In getDataFromJSON function")
+
 	scriptType, ok := jsonData.Path("type").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["type"] = strings.ToLower(scriptType)
 
 	search, ok := jsonData.Path("search").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
+	log.Println("%s search actions", strings.ToLower(search))
 	(*infos)["search"] = strings.ToLower(search)
 
 	timeWatching, ok := jsonData.Path("timeWatching").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["timeWatching"] = strings.ToLower(timeWatching)
 
 	social, ok := jsonData.Path("social").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["social"] = strings.ToLower(social)
 
 	watchNext, ok := jsonData.Path("watchNext").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchNext"] = watchNext
 
 	watchFromURL, ok := jsonData.Path("watchFromURL").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchFromURL"] = watchFromURL
 
 	watchFromHome, ok := jsonData.Path("watchFromHome").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchFromHome"] = watchFromHome
 
 	watchFromSearch, ok := jsonData.Path("watchFromSearch").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchFromSearch"] = watchFromSearch
 
 	watchFromChannel, ok := jsonData.Path("watchFromChannel").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchFromChannel"] = watchFromChannel
 
 	watchRecommanded, ok := jsonData.Path("watchRecommanded").Data().(string)
-	if ok {
-		respond(w, http.StatusOK, string(jsonData.Bytes()))
+	if !ok {
 		return false
 	}
 	(*infos)["watchRecommanded"] = watchRecommanded
@@ -123,11 +114,11 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string, w *http
 }
 
 func getSliceFromJSON(jsonData *gabs.Container, infos *[]string, w *http.ResponseWriter) bool {
-	children, err := jsonData.S("order").Children()
-	if err != nil {
+	children := jsonData.S("order").Children()
+	/*if err != nil {
 		log.Println(err)
 		return false
-	}
+	}*/
 	for _, child := range children {
 		*infos = append(*infos, child.Data().(string))
 	}

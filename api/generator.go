@@ -45,17 +45,19 @@ type action struct {
 
 func WriteScript(infos *map[string]string, order *[]string) error {
 
+	log.Println("In WriteScript function")
+
 	social := (*infos)["social"]
 	stopsAt := (*infos)["stopsAt"]
 
 	interractionPercent, _ := strconv.Atoi((*infos)["interractionPercent"])
 
-	n, _ := strconv.Atoi((*infos)["watchFromURL"])
-
-	urls, err := getWatchURL(n, social, stopsAt, interractionPercent)
+	//n, _ := strconv.Atoi((*infos)["watchFromURL"])
+	/*urls, err := getWatchURL(n, social, stopsAt, interractionPercent)
 	if err != nil {
 		fmt.Println("Error while getting info from DB")
-	}
+	}*/
+	urls := &[]action{}
 
 	next, _ := strconv.Atoi((*infos)["watchNext"])
 	nexts := getWatchNext(next, social, stopsAt, interractionPercent)
@@ -77,7 +79,7 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(json)
+	log.Println(json)
 
 	return nil
 }
@@ -154,6 +156,10 @@ func getSearchAndWatch(n int, search string, social string, stopsAt string, inte
 			watchContext: w}
 	}
 
+	for s := range searches {
+		fmt.Println(s)
+	}
+
 	return &searches
 }
 
@@ -194,6 +200,8 @@ func getWatchFromHome(n int, social string, stopsAt string, interractionPercent 
 }
 
 func getWatchNext(n int, social string, stopsAt string, interractionPercent int) *[]action {
+
+	log.Println("In watch next function with %d actions", n)
 
 	nexts := []action{}
 
