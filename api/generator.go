@@ -43,7 +43,7 @@ type Action struct {
 	WatchContext *WatchContext `json:"watchContext,omitempty"`
 }
 
-func WriteScript(infos *map[string]string, order *[]string) error {
+func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 
 	log.Println("In WriteScript function")
 
@@ -82,8 +82,8 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 		log.Println(err)
 	}
 	log.Println(string(json))
-
-	return nil
+	res := `{ "actions": ` + string(json) + ` }`
+	return res, nil
 }
 
 func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]Action, error) {
@@ -141,10 +141,10 @@ func getSearchAndWatch(n int, search string, social string, stopsAt string, inte
 		if search == "conspi" {
 
 			r := rand.Intn(len(covidList))
-			str += covidList[r]
+			str = covidList[r] + " "
 
 			r = rand.Intn(len(conspiList))
-			str = conspiList[r] + " "
+			str += conspiList[r]
 		}
 
 		index := rand.Intn(20) + 1

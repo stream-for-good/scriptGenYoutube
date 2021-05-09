@@ -35,11 +35,11 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	order := []string{}
 	getSliceFromJSON(jsonData, &order, &w)
 
-	err = WriteScript(&infos, &order)
-
+	result, err := WriteScript(&infos, &order)
 	if err != nil {
 		respond(&w, http.StatusInternalServerError, err.Error())
 	}
+	respond(&w, http.StatusOK, result)
 }
 
 // Processes the JSON received by the server and fills a map to be used by the Mesh API
