@@ -63,17 +63,23 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 	log.Println("%s search actions", strings.ToLower(search))
 	(*infos)["search"] = strings.ToLower(search)
 
-	timeWatching, ok := jsonData.Path("timeWatching").Data().(string)
+	stopsAt, ok := jsonData.Path("stopsAt").Data().(string)
 	if !ok {
 		return false
 	}
-	(*infos)["timeWatching"] = strings.ToLower(timeWatching)
+	(*infos)["stopsAt"] = strings.ToLower(stopsAt)
 
 	social, ok := jsonData.Path("social").Data().(string)
 	if !ok {
 		return false
 	}
 	(*infos)["social"] = strings.ToLower(social)
+
+	interactionPercent, ok := jsonData.Path("interactionPercent").Data().(string)
+	if !ok {
+		return false
+	}
+	(*infos)["interactionPercent"] = strings.ToLower(interactionPercent)
 
 	watchNext, ok := jsonData.Path("watchNext").Data().(string)
 	if !ok {

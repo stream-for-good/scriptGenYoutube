@@ -30,17 +30,17 @@ var covidList = []string{
 	"Covid",
 }
 
-type watchContext struct {
-	stopsAt string `json:stopsAt, omitempty`
-	social  string `json:social, omitempty`
+type WatchContext struct {
+	StopsAt string `json:"stopsAt,omitempty"`
+	Social  string `json:"social,omitempty"`
 }
 
-type action struct {
-	action       string
-	index        string       `json:index, omitempty`
-	url          string       `json:url, omitempty`
-	toSearch     string       `json:toSearch, omitempty`
-	watchContext watchContext `json:watchContext, omitempty`
+type Action struct {
+	Action       string        `json:"action,omitempty"`
+	Index        string        `json:"index,omitempty"`
+	Url          string        `json:"url,omitempty"`
+	ToSearch     string        `json:"toSearch,omitempty"`
+	WatchContext *WatchContext `json:"watchContext,omitempty"`
 }
 
 func WriteScript(infos *map[string]string, order *[]string) error {
@@ -50,30 +50,30 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 	social := (*infos)["social"]
 	stopsAt := (*infos)["stopsAt"]
 
-	interractionPercent, _ := strconv.Atoi((*infos)["interractionPercent"])
+	interactionPercent, _ := strconv.Atoi((*infos)["interactionPercent"])
 
 	//n, _ := strconv.Atoi((*infos)["watchFromURL"])
 	/*urls, err := getWatchURL(n, social, stopsAt, interractionPercent)
 	if err != nil {
 		fmt.Println("Error while getting info from DB")
 	}*/
-	urls := &[]action{}
+	urls := &[]Action{}
 
 	next, _ := strconv.Atoi((*infos)["watchNext"])
-	nexts := getWatchNext(next, social, stopsAt, interractionPercent)
+	nexts := getWatchNext(next, social, stopsAt, interactionPercent)
 
 	recommanded, _ := strconv.Atoi((*infos)["watchRecommanded"])
-	recommandeds := getWatchRecommanded(recommanded, social, stopsAt, interractionPercent)
+	recommandeds := getWatchRecommanded(recommanded, social, stopsAt, interactionPercent)
 
 	home, _ := strconv.Atoi((*infos)["watchFromHome"])
-	homes := getWatchFromHome(home, social, stopsAt, interractionPercent)
+	homes := getWatchFromHome(home, social, stopsAt, interactionPercent)
 
 	channel, _ := strconv.Atoi((*infos)["watchFromChannel"])
-	channels := getWatchFromChannel(channel, social, stopsAt, interractionPercent)
+	channels := getWatchFromChannel(channel, social, stopsAt, interactionPercent)
 
 	searchType := (*infos)["search"]
 	search, _ := strconv.Atoi((*infos)["watchFromSearch"])
-	searches := getSearchAndWatch(search, searchType, social, stopsAt, interractionPercent)
+	searches := getSearchAndWatch(search, searchType, social, stopsAt, interactionPercent)
 
 	log.Println("All data formated")
 
@@ -81,15 +81,14 @@ func WriteScript(infos *map[string]string, order *[]string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(json)
+	log.Println(string(json))
 
 	return nil
 }
 
-func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]action, error) {
+func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]Action, error) {
 
-	rand.Seed(time.Now().UnixNano())
-	urls := make([]action, n)
+	urls := make([]Action, n)
 	count := 0
 
 	db, err := sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/gocron")
@@ -120,140 +119,139 @@ func getWatchURL(n int, social string, stopsAt string, interractionPercent int) 
 
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		urls[count] = action{
-			action:       "watch",
-			url:          "https://www.youtube.com/watch?v=" + id,
-			watchContext: *w}
+		urls[count] = Action{
+			Action:       "watch",
+			Url:          "https://www.youtube.com/watch?v=" + id,
+			WatchContext: w}
 		count++
 	}
 
 	return &urls, nil
 }
 
-func getSearchAndWatch(n int, search string, social string, stopsAt string, interractionPercent int) *[]action {
+func getSearchAndWatch(n int, search string, social string, stopsAt string, interractionPercent int) *[]Action {
 
+	log.Println("In search & watch function with %d actions", n)
 	rand.Seed(time.Now().UnixNano())
-	searches := make([]action, 2*n)
+	searches := make([]Action, 2*n)
 
 	for i := 0; i < 2*n; i += 2 {
 
 		str := ""
 		if search == "conspi" {
-			r := rand.Intn(len(conspiList))
-			str = conspiList[r] + " "
 
-			r = rand.Intn(len(covidList))
+			r := rand.Intn(len(covidList))
 			str += covidList[r]
+
+			r = rand.Intn(len(conspiList))
+			str = conspiList[r] + " "
 		}
 
 		index := rand.Intn(20) + 1
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		searches[i] = action{
-			action:   "search",
-			toSearch: str}
-		searches[i+1] = action{
-			action:       "watch",
-			index:        strconv.Itoa(index),
-			watchContext: *w}
-	}
-
-	for s := range searches {
-		fmt.Println(s)
+		searches[i] = Action{
+			Action:   "search",
+			ToSearch: str}
+		searches[i+1] = Action{
+			Action:       "watch",
+			Index:        strconv.Itoa(index),
+			WatchContext: w}
 	}
 
 	return &searches
 }
 
-func getWatchFromChannel(n int, social string, stopsAt string, interractionPercent int) *[]action {
+func getWatchFromChannel(n int, social string, stopsAt string, interractionPercent int) *[]Action {
 
-	channels := make([]action, 2*n)
+	rand.Seed(time.Now().UnixNano())
+	channels := make([]Action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		channels[i] = action{
-			action: "goToChannel"}
-		channels[i+1] = action{
-			action:       "watch",
-			index:        strconv.Itoa(index),
-			watchContext: *w}
+		channels[i] = Action{
+			Action: "goToChannel"}
+		channels[i+1] = Action{
+			Action:       "watch",
+			Index:        strconv.Itoa(index),
+			WatchContext: w}
 	}
 	return &channels
 }
 
-func getWatchFromHome(n int, social string, stopsAt string, interractionPercent int) *[]action {
+func getWatchFromHome(n int, social string, stopsAt string, interractionPercent int) *[]Action {
 
-	homes := make([]action, 2*n)
+	rand.Seed(time.Now().UnixNano())
+	homes := make([]Action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		homes[i] = action{
-			action: "goToHome"}
-		homes[i+1] = action{
-			action:       "watch",
-			index:        strconv.Itoa(index),
-			watchContext: *w}
+		homes[i] = Action{
+			Action: "goToHome"}
+		homes[i+1] = Action{
+			Action:       "watch",
+			Index:        strconv.Itoa(index),
+			WatchContext: w}
 	}
 	return &homes
 }
 
-func getWatchNext(n int, social string, stopsAt string, interractionPercent int) *[]action {
+func getWatchNext(n int, social string, stopsAt string, interractionPercent int) *[]Action {
 
-	log.Println("In watch next function with %d actions", n)
-
-	nexts := make([]action, n)
+	nexts := make([]Action, n)
 
 	for i := 0; i < n; i++ {
-		log.Printf("i equal %d", i)
 		w := getWatchContext(social, stopsAt, interractionPercent)
-		nexts[i] = action{
-			action:       "watch",
-			index:        "1",
-			watchContext: *w}
-		log.Println("action added !")
+		nexts[i] = Action{
+			Action:       "watch",
+			Index:        "1",
+			WatchContext: w}
 	}
 
-	log.Println("Watch next ended !")
 	return &nexts
 }
 
-func getWatchRecommanded(n int, social string, stopsAt string, interractionPercent int) *[]action {
+func getWatchRecommanded(n int, social string, stopsAt string, interractionPercent int) *[]Action {
 
-	recommandeds := make([]action, n)
+	rand.Seed(time.Now().UnixNano())
+	recommandeds := make([]Action, n)
 	for i := 0; i < n; i++ {
 
 		index := rand.Intn(20) + 1
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		recommandeds[i] = action{
-			action:       "watch",
-			index:        strconv.Itoa(index),
-			watchContext: *w}
+		recommandeds[i] = Action{
+			Action:       "watch",
+			Index:        strconv.Itoa(index),
+			WatchContext: w}
 	}
 	return &recommandeds
 }
 
-func getWatchContext(social string, stopsAt string, interractionPercent int) *watchContext {
+func getWatchContext(social string, stopsAt string, interractionPercent int) *WatchContext {
 
+	log.Println(social, stopsAt, interractionPercent)
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(101)
-	w := watchContext{}
+	w := WatchContext{}
 	if r < interractionPercent {
-		w = watchContext{social: social, stopsAt: stopsAt}
+		w = WatchContext{Social: social, StopsAt: stopsAt}
+		log.Println("ici ", w)
 	} else {
-		w = watchContext{stopsAt: stopsAt}
+		w = WatchContext{StopsAt: stopsAt}
 	}
+	log.Println(w)
 	return &w
 }
 
-func writeOrder(order *[]string, urls *[]action, nexts *[]action, recommandeds *[]action, homes *[]action, channels *[]action, searches *[]action) ([]byte, error) {
+func writeOrder(order *[]string, urls *[]Action, nexts *[]Action, recommandeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
 	log.Println("In write order func")
 
-	actions := []action{}
+	actions := []Action{}
 	for _, o := range *order {
 		switch o {
 		case "url":
@@ -266,7 +264,7 @@ func writeOrder(order *[]string, urls *[]action, nexts *[]action, recommandeds *
 			actions = append(actions, *homes...)
 		case "channel":
 			actions = append(actions, *channels...)
-		case "seraches":
+		case "search":
 			actions = append(actions, *searches...)
 		}
 	}
