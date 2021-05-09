@@ -86,6 +86,7 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 	return res, nil
 }
 
+// TODO test with URL (connection to DB is needed
 func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]Action, error) {
 
 	urls := make([]Action, n)
@@ -215,6 +216,7 @@ func getWatchNext(n int, social string, stopsAt string, interractionPercent int)
 	return &nexts
 }
 
+// TODO coorect typo in Recommanded
 func getWatchRecommanded(n int, social string, stopsAt string, interractionPercent int) *[]Action {
 
 	rand.Seed(time.Now().UnixNano())
@@ -232,6 +234,7 @@ func getWatchRecommanded(n int, social string, stopsAt string, interractionPerce
 	return &recommandeds
 }
 
+// TODO Improve watch context to handle several "stopsAt" variable
 func getWatchContext(social string, stopsAt string, interractionPercent int) *WatchContext {
 
 	log.Println(social, stopsAt, interractionPercent)
@@ -248,6 +251,7 @@ func getWatchContext(social string, stopsAt string, interractionPercent int) *Wa
 	return &w
 }
 
+// TODO write without specified order
 func writeOrder(order *[]string, urls *[]Action, nexts *[]Action, recommandeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
 	log.Println("In write order func")
 
