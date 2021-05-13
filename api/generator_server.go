@@ -47,6 +47,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // - json   : JSON representation of the task received of the server
 // - infos  : Contains infos passed in the script and that are going to be used to generate scripts
 // - w      : Used to respond error messages to sender in case of malformed JSON
+// TODO : ADD DEFAULT VALUES
 func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 
 	scriptType, ok := jsonData.Path("type").Data().(string)
