@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	log.Println("Script Generator service started !")
+	log.Println("Script Generator Service Started !")
 	// db := connect
 
 	http.HandleFunc("/generate", api.Generate)

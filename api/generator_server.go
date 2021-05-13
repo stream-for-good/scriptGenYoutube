@@ -13,7 +13,7 @@ import (
 
 func Generate(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("Service Started...")
+	log.Println("Request Received...")
 
 	req, err := ioutil.ReadAll(r.Body)
 	defer bodyCloser(r.Body)
@@ -48,7 +48,6 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // - infos  : Contains infos passed in the script and that are going to be used to generate scripts
 // - w      : Used to respond error messages to sender in case of malformed JSON
 func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
-	log.Println("In getDataFromJSON function")
 
 	scriptType, ok := jsonData.Path("type").Data().(string)
 	if !ok {
@@ -60,7 +59,6 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 	if !ok {
 		return false
 	}
-	log.Println("%s search actions", strings.ToLower(search))
 	(*infos)["search"] = strings.ToLower(search)
 
 	stopsAt, ok := jsonData.Path("stopsAt").Data().(string)

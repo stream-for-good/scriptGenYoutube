@@ -31,13 +31,13 @@ var covidList = []string{
 }
 
 type WatchContext struct {
-	StopsAt string `json:"stopsAt,omitempty"`
+	StopsAt int    `json:"stopsAt,omitempty"`
 	Social  string `json:"social,omitempty"`
 }
 
 type Action struct {
 	Action       string        `json:"action,omitempty"`
-	Index        string        `json:"index,omitempty"`
+	Index        int           `json:"index,omitempty"`
 	Url          string        `json:"url,omitempty"`
 	ToSearch     string        `json:"toSearch,omitempty"`
 	WatchContext *WatchContext `json:"watchContext,omitempty"`
@@ -45,10 +45,8 @@ type Action struct {
 
 func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 
-	log.Println("In WriteScript function")
-
 	social := (*infos)["social"]
-	stopsAt := (*infos)["stopsAt"]
+	stopsAt, _ := strconv.Atoi((*infos)["stopsAt"])
 
 	interactionPercent, _ := strconv.Atoi((*infos)["interactionPercent"])
 
@@ -62,8 +60,8 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 	next, _ := strconv.Atoi((*infos)["watchNext"])
 	nexts := getWatchNext(next, social, stopsAt, interactionPercent)
 
-	recommanded, _ := strconv.Atoi((*infos)["watchRecommanded"])
-	recommandeds := getWatchRecommanded(recommanded, social, stopsAt, interactionPercent)
+	recommended, _ := strconv.Atoi((*infos)["watchrecommended"])
+	recommendeds := getWatchrecommended(recommended, social, stopsAt, interactionPercent)
 
 	home, _ := strconv.Atoi((*infos)["watchFromHome"])
 	homes := getWatchFromHome(home, social, stopsAt, interactionPercent)
@@ -75,19 +73,18 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 	search, _ := strconv.Atoi((*infos)["watchFromSearch"])
 	searches := getSearchAndWatch(search, searchType, social, stopsAt, interactionPercent)
 
-	log.Println("All data formated")
+	log.Println("All data formated !")
 
-	json, err := writeOrder(order, urls, nexts, recommandeds, homes, channels, searches)
+	json, err := write(order, urls, nexts, recommendeds, homes, channels, searches)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(string(json))
 	res := `{ "actions": ` + string(json) + ` }`
 	return res, nil
 }
 
 // TODO test with URL (connection to DB is needed
-func getWatchURL(n int, social string, stopsAt string, interractionPercent int) (*[]Action, error) {
+func getWatchURL(n int, social string, stopsAt int, interractionPercent int) (*[]Action, error) {
 
 	urls := make([]Action, n)
 	count := 0
@@ -130,9 +127,8 @@ func getWatchURL(n int, social string, stopsAt string, interractionPercent int) 
 	return &urls, nil
 }
 
-func getSearchAndWatch(n int, search string, social string, stopsAt string, interractionPercent int) *[]Action {
+func getSearchAndWatch(n int, search string, social string, stopsAt int, interractionPercent int) *[]Action {
 
-	log.Println("In search & watch function with %d actions", n)
 	rand.Seed(time.Now().UnixNano())
 	searches := make([]Action, 2*n)
 
@@ -156,14 +152,14 @@ func getSearchAndWatch(n int, search string, social string, stopsAt string, inte
 			ToSearch: str}
 		searches[i+1] = Action{
 			Action:       "watch",
-			Index:        strconv.Itoa(index),
+			Index:        index,
 			WatchContext: w}
 	}
 
 	return &searches
 }
 
-func getWatchFromChannel(n int, social string, stopsAt string, interractionPercent int) *[]Action {
+func getWatchFromChannel(n int, social string, stopsAt int, interractionPercent int) *[]Action {
 
 	rand.Seed(time.Now().UnixNano())
 	channels := make([]Action, 2*n)
@@ -176,13 +172,13 @@ func getWatchFromChannel(n int, social string, stopsAt string, interractionPerce
 			Action: "goToChannel"}
 		channels[i+1] = Action{
 			Action:       "watch",
-			Index:        strconv.Itoa(index),
+			Index:        index,
 			WatchContext: w}
 	}
 	return &channels
 }
 
-func getWatchFromHome(n int, social string, stopsAt string, interractionPercent int) *[]Action {
+func getWatchFromHome(n int, social string, stopsAt int, interractionPercent int) *[]Action {
 
 	rand.Seed(time.Now().UnixNano())
 	homes := make([]Action, 2*n)
@@ -195,13 +191,13 @@ func getWatchFromHome(n int, social string, stopsAt string, interractionPercent 
 			Action: "goToHome"}
 		homes[i+1] = Action{
 			Action:       "watch",
-			Index:        strconv.Itoa(index),
+			Index:        index,
 			WatchContext: w}
 	}
 	return &homes
 }
 
-func getWatchNext(n int, social string, stopsAt string, interractionPercent int) *[]Action {
+func getWatchNext(n int, social string, stopsAt int, interractionPercent int) *[]Action {
 
 	nexts := make([]Action, n)
 
@@ -209,51 +205,46 @@ func getWatchNext(n int, social string, stopsAt string, interractionPercent int)
 		w := getWatchContext(social, stopsAt, interractionPercent)
 		nexts[i] = Action{
 			Action:       "watch",
-			Index:        "1",
+			Index:        1,
 			WatchContext: w}
 	}
 
 	return &nexts
 }
 
-// TODO coorect typo in Recommanded
-func getWatchRecommanded(n int, social string, stopsAt string, interractionPercent int) *[]Action {
+// TODO coorect typo in recommended
+func getWatchrecommended(n int, social string, stopsAt int, interractionPercent int) *[]Action {
 
 	rand.Seed(time.Now().UnixNano())
-	recommandeds := make([]Action, n)
+	recommendeds := make([]Action, n)
 	for i := 0; i < n; i++ {
 
 		index := rand.Intn(20) + 1
 		w := getWatchContext(social, stopsAt, interractionPercent)
 
-		recommandeds[i] = Action{
+		recommendeds[i] = Action{
 			Action:       "watch",
-			Index:        strconv.Itoa(index),
+			Index:        index,
 			WatchContext: w}
 	}
-	return &recommandeds
+	return &recommendeds
 }
 
 // TODO Improve watch context to handle several "stopsAt" variable
-func getWatchContext(social string, stopsAt string, interractionPercent int) *WatchContext {
+func getWatchContext(social string, stopsAt int, interractionPercent int) *WatchContext {
 
-	log.Println(social, stopsAt, interractionPercent)
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(101)
 	w := WatchContext{}
 	if r < interractionPercent {
 		w = WatchContext{Social: social, StopsAt: stopsAt}
-		log.Println("ici ", w)
 	} else {
 		w = WatchContext{StopsAt: stopsAt}
 	}
-	log.Println(w)
 	return &w
 }
 
-// TODO write without specified order
-func writeOrder(order *[]string, urls *[]Action, nexts *[]Action, recommandeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
-	log.Println("In write order func")
+func writeOrdered(order *[]string, urls *[]Action, nexts *[]Action, recommendeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
 
 	actions := []Action{}
 	for _, o := range *order {
@@ -262,8 +253,8 @@ func writeOrder(order *[]string, urls *[]Action, nexts *[]Action, recommandeds *
 			actions = append(actions, *urls...)
 		case "upNext":
 			actions = append(actions, *nexts...)
-		case "recommanded":
-			actions = append(actions, *recommandeds...)
+		case "recommended":
+			actions = append(actions, *recommendeds...)
 		case "home":
 			actions = append(actions, *homes...)
 		case "channel":
@@ -273,5 +264,76 @@ func writeOrder(order *[]string, urls *[]Action, nexts *[]Action, recommandeds *
 		}
 	}
 	return json.Marshal(actions)
+}
 
+// TODO write without specified order
+func writeUnordered(urls *[]Action, nexts *[]Action, recommendeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
+
+	rand.Seed(time.Now().UnixNano())
+	r := rand.Intn(6)
+	urlIndex := 0
+	nextsIndex := 0
+	recommendedIndex := 0
+	homeIndex := 0
+	channelIndex := 0
+	searchIndex := 0
+
+	n := len(*urls) + len(*nexts) + len(*recommendeds) + len(*homes) + len(*channels) + len(*searches)
+	actions := []Action{}
+
+	for i := 0; i < n; i++ {
+		switch r {
+		case 0:
+			if urlIndex < len(*urls) {
+				actions = append(actions, (*urls)[urlIndex])
+				urlIndex++
+			} else {
+				r++
+			}
+		case 1:
+			if nextsIndex < len(*nexts) {
+				actions = append(actions, (*nexts)[nextsIndex])
+				nextsIndex++
+			} else {
+				r++
+			}
+		case 2:
+			if recommendedIndex < len(*recommendeds) {
+				actions = append(actions, (*recommendeds)[recommendedIndex])
+				recommendedIndex++
+			} else {
+				r++
+			}
+		case 3:
+			if homeIndex < len(*homes) {
+				actions = append(actions, (*homes)[homeIndex])
+				homeIndex++
+			} else {
+				r++
+			}
+		case 4:
+			if channelIndex < len(*channels) {
+				actions = append(actions, (*channels)[channelIndex])
+				channelIndex++
+			} else {
+				r++
+			}
+		case 5:
+			if searchIndex < len(*searches) {
+				actions = append(actions, (*searches)[searchIndex])
+				searchIndex++
+			} else {
+				r++
+			}
+		}
+	}
+	return json.Marshal(actions)
+
+}
+
+func write(order *[]string, urls *[]Action, nexts *[]Action, recommendeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
+	if len(*order) > 0 {
+		return writeOrdered(order, urls, nexts, recommendeds, homes, channels, searches)
+	}
+	return writeUnordered(urls, nexts, recommendeds, homes, channels, searches)
 }
