@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+const (
+	username = "lalbert"
+	password = "ib8jaeyahTei"
+	hostname = "hn105529-001.dbaas.ovh.net:35552"
+)
+
 var conspiList = []string{
 	"5G",
 	"Weapon",
@@ -50,12 +56,11 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 
 	interactionPercent, _ := strconv.Atoi((*infos)["interactionPercent"])
 
-	//n, _ := strconv.Atoi((*infos)["watchFromURL"])
-	/*urls, err := getWatchURL(n, social, stopsAt, interractionPercent)
+	n, _ := strconv.Atoi((*infos)["watchFromURL"])
+	urls, err := getWatchURL(n, social, stopsAt, interactionPercent)
 	if err != nil {
 		fmt.Println("Error while getting info from DB")
-	}*/
-	urls := &[]Action{}
+	}
 
 	next, _ := strconv.Atoi((*infos)["watchNext"])
 	nexts := getWatchNext(next, social, stopsAt, interactionPercent)
@@ -89,7 +94,7 @@ func getWatchURL(n int, social string, stopsAt int, interractionPercent int) (*[
 	urls := make([]Action, n)
 	count := 0
 
-	db, err := sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/gocron")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/", username, password, hostname))
 	if err != nil {
 		log.Fatal("Error connecting to the database ...")
 		return nil, err
