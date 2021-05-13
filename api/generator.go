@@ -51,6 +51,9 @@ type Action struct {
 
 func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 
+	log.Println("ici")
+	rand.Seed(time.Now().UnixNano())
+
 	social := (*infos)["social"]
 	stopsAt, _ := strconv.Atoi((*infos)["stopsAt"])
 
@@ -65,8 +68,8 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 	next, _ := strconv.Atoi((*infos)["watchNext"])
 	nexts := getWatchNext(next, social, stopsAt, interactionPercent)
 
-	recommended, _ := strconv.Atoi((*infos)["watchrecommended"])
-	recommendeds := getWatchrecommended(recommended, social, stopsAt, interactionPercent)
+	recommended, _ := strconv.Atoi((*infos)["watchRecommended"])
+	recommendeds := getWatchRecommended(recommended, social, stopsAt, interactionPercent)
 
 	home, _ := strconv.Atoi((*infos)["watchFromHome"])
 	homes := getWatchFromHome(home, social, stopsAt, interactionPercent)
@@ -89,7 +92,11 @@ func WriteScript(infos *map[string]string, order *[]string) (string, error) {
 }
 
 // TODO test with URL (connection to DB is needed
-func getWatchURL(n int, social string, stopsAt int, interractionPercent int) (*[]Action, error) {
+func getWatchURL(n int, social string, stopsAt int, interactionPercent int) (*[]Action, error) {
+
+	if n == 0 {
+		return &[]Action{}, nil
+	}
 
 	urls := make([]Action, n)
 	count := 0
@@ -120,7 +127,7 @@ func getWatchURL(n int, social string, stopsAt int, interractionPercent int) (*[
 			return nil, err
 		}
 
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 
 		urls[count] = Action{
 			Action:       "watch",
@@ -132,9 +139,8 @@ func getWatchURL(n int, social string, stopsAt int, interractionPercent int) (*[
 	return &urls, nil
 }
 
-func getSearchAndWatch(n int, search string, social string, stopsAt int, interractionPercent int) *[]Action {
+func getSearchAndWatch(n int, search string, social string, stopsAt int, interactionPercent int) *[]Action {
 
-	rand.Seed(time.Now().UnixNano())
 	searches := make([]Action, 2*n)
 
 	for i := 0; i < 2*n; i += 2 {
@@ -150,7 +156,7 @@ func getSearchAndWatch(n int, search string, social string, stopsAt int, interra
 		}
 
 		index := rand.Intn(20) + 1
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 
 		searches[i] = Action{
 			Action:   "search",
@@ -164,14 +170,13 @@ func getSearchAndWatch(n int, search string, social string, stopsAt int, interra
 	return &searches
 }
 
-func getWatchFromChannel(n int, social string, stopsAt int, interractionPercent int) *[]Action {
+func getWatchFromChannel(n int, social string, stopsAt int, interactionPercent int) *[]Action {
 
-	rand.Seed(time.Now().UnixNano())
 	channels := make([]Action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 
 		channels[i] = Action{
 			Action: "goToChannel"}
@@ -183,14 +188,13 @@ func getWatchFromChannel(n int, social string, stopsAt int, interractionPercent 
 	return &channels
 }
 
-func getWatchFromHome(n int, social string, stopsAt int, interractionPercent int) *[]Action {
+func getWatchFromHome(n int, social string, stopsAt int, interactionPercent int) *[]Action {
 
-	rand.Seed(time.Now().UnixNano())
 	homes := make([]Action, 2*n)
 	for i := 0; i < 2*n; i += 2 {
 
 		index := rand.Intn(20) + 1
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 
 		homes[i] = Action{
 			Action: "goToHome"}
@@ -202,12 +206,12 @@ func getWatchFromHome(n int, social string, stopsAt int, interractionPercent int
 	return &homes
 }
 
-func getWatchNext(n int, social string, stopsAt int, interractionPercent int) *[]Action {
+func getWatchNext(n int, social string, stopsAt int, interactionPercent int) *[]Action {
 
 	nexts := make([]Action, n)
 
 	for i := 0; i < n; i++ {
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 		nexts[i] = Action{
 			Action:       "watch",
 			Index:        1,
@@ -218,14 +222,13 @@ func getWatchNext(n int, social string, stopsAt int, interractionPercent int) *[
 }
 
 // TODO coorect typo in recommended
-func getWatchrecommended(n int, social string, stopsAt int, interractionPercent int) *[]Action {
+func getWatchRecommended(n int, social string, stopsAt int, interactionPercent int) *[]Action {
 
-	rand.Seed(time.Now().UnixNano())
 	recommendeds := make([]Action, n)
 	for i := 0; i < n; i++ {
 
 		index := rand.Intn(20) + 1
-		w := getWatchContext(social, stopsAt, interractionPercent)
+		w := getWatchContext(social, stopsAt, interactionPercent)
 
 		recommendeds[i] = Action{
 			Action:       "watch",
@@ -236,12 +239,11 @@ func getWatchrecommended(n int, social string, stopsAt int, interractionPercent 
 }
 
 // TODO Improve watch context to handle several "stopsAt" variable
-func getWatchContext(social string, stopsAt int, interractionPercent int) *WatchContext {
+func getWatchContext(social string, stopsAt int, interactionPercent int) *WatchContext {
 
-	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(101)
 	w := WatchContext{}
-	if r < interractionPercent {
+	if r < interactionPercent {
 		w = WatchContext{Social: social, StopsAt: stopsAt}
 	} else {
 		w = WatchContext{StopsAt: stopsAt}
@@ -256,7 +258,7 @@ func writeOrdered(order *[]string, urls *[]Action, nexts *[]Action, recommendeds
 		switch o {
 		case "url":
 			actions = append(actions, *urls...)
-		case "upNext":
+		case "next":
 			actions = append(actions, *nexts...)
 		case "recommended":
 			actions = append(actions, *recommendeds...)
@@ -274,61 +276,49 @@ func writeOrdered(order *[]string, urls *[]Action, nexts *[]Action, recommendeds
 // TODO write without specified order
 func writeUnordered(urls *[]Action, nexts *[]Action, recommendeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
 
-	rand.Seed(time.Now().UnixNano())
-	r := rand.Intn(6)
 	urlIndex := 0
-	nextsIndex := 0
+	nextIndex := 0
 	recommendedIndex := 0
 	homeIndex := 0
 	channelIndex := 0
 	searchIndex := 0
 
 	n := len(*urls) + len(*nexts) + len(*recommendeds) + len(*homes) + len(*channels) + len(*searches)
+	log.Println(n)
 	actions := []Action{}
 
 	for i := 0; i < n; i++ {
+		r := rand.Intn(6)
 		switch r {
 		case 0:
 			if urlIndex < len(*urls) {
 				actions = append(actions, (*urls)[urlIndex])
 				urlIndex++
-			} else {
-				r++
 			}
 		case 1:
-			if nextsIndex < len(*nexts) {
-				actions = append(actions, (*nexts)[nextsIndex])
-				nextsIndex++
-			} else {
-				r++
+			if nextIndex < len(*nexts) {
+				actions = append(actions, (*nexts)[nextIndex])
+				nextIndex++
 			}
 		case 2:
 			if recommendedIndex < len(*recommendeds) {
 				actions = append(actions, (*recommendeds)[recommendedIndex])
 				recommendedIndex++
-			} else {
-				r++
 			}
 		case 3:
 			if homeIndex < len(*homes) {
 				actions = append(actions, (*homes)[homeIndex])
 				homeIndex++
-			} else {
-				r++
 			}
 		case 4:
 			if channelIndex < len(*channels) {
 				actions = append(actions, (*channels)[channelIndex])
 				channelIndex++
-			} else {
-				r++
 			}
 		case 5:
 			if searchIndex < len(*searches) {
 				actions = append(actions, (*searches)[searchIndex])
 				searchIndex++
-			} else {
-				r++
 			}
 		}
 	}

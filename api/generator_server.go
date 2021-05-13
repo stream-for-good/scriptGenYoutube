@@ -47,7 +47,6 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // - json   : JSON representation of the task received of the server
 // - infos  : Contains infos passed in the script and that are going to be used to generate scripts
 // - w      : Used to respond error messages to sender in case of malformed JSON
-// TODO : ADD DEFAULT VALUES
 func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 
 	scriptType, ok := jsonData.Path("type").Data().(string)
@@ -58,63 +57,63 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 
 	search, ok := jsonData.Path("search").Data().(string)
 	if !ok {
-		return false
+		(*infos)["search"] = "0"
 	}
 	(*infos)["search"] = strings.ToLower(search)
 
 	stopsAt, ok := jsonData.Path("stopsAt").Data().(string)
 	if !ok {
-		return false
+		(*infos)["stopsAt"] = ""
 	}
 	(*infos)["stopsAt"] = strings.ToLower(stopsAt)
 
 	social, ok := jsonData.Path("social").Data().(string)
 	if !ok {
-		return false
+		(*infos)["social"] = ""
 	}
 	(*infos)["social"] = strings.ToLower(social)
 
 	interactionPercent, ok := jsonData.Path("interactionPercent").Data().(string)
 	if !ok {
-		return false
+		(*infos)["interactionPercent"] = "0"
 	}
 	(*infos)["interactionPercent"] = strings.ToLower(interactionPercent)
 
 	watchNext, ok := jsonData.Path("watchNext").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchNext"] = "0"
 	}
 	(*infos)["watchNext"] = watchNext
 
 	watchFromURL, ok := jsonData.Path("watchFromURL").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchFromURL"] = "0"
 	}
 	(*infos)["watchFromURL"] = watchFromURL
 
 	watchFromHome, ok := jsonData.Path("watchFromHome").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchFromHome"] = "0"
 	}
 	(*infos)["watchFromHome"] = watchFromHome
 
 	watchFromSearch, ok := jsonData.Path("watchFromSearch").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchFromSearch"] = "0"
 	}
 	(*infos)["watchFromSearch"] = watchFromSearch
 
 	watchFromChannel, ok := jsonData.Path("watchFromChannel").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchFromChannel"] = "0"
 	}
 	(*infos)["watchFromChannel"] = watchFromChannel
 
-	watchRecommanded, ok := jsonData.Path("watchRecommanded").Data().(string)
+	watchRecommended, ok := jsonData.Path("watchRecommended").Data().(string)
 	if !ok {
-		return false
+		(*infos)["watchRecommended"] = "0"
 	}
-	(*infos)["watchRecommanded"] = watchRecommanded
+	(*infos)["watchRecommended"] = watchRecommended
 	return true
 }
 
