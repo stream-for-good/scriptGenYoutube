@@ -28,6 +28,11 @@ var conspiList = []string{
 	"Wuhan-Virus",
 }
 
+var notConspiList = []string{
+	"Debunking",
+	"Informative",
+}
+
 var covidList = []string{
 	"Sars-Cov2",
 	"Covid-19",
@@ -221,7 +226,6 @@ func getWatchNext(n int, social string, stopsAt int, interactionPercent int) *[]
 	return &nexts
 }
 
-// TODO coorect typo in recommended
 func getWatchRecommended(n int, social string, stopsAt int, interactionPercent int) *[]Action {
 
 	recommendeds := make([]Action, n)
@@ -273,9 +277,7 @@ func writeOrdered(order *[]string, urls *[]Action, nexts *[]Action, recommendeds
 	return json.Marshal(actions)
 }
 
-// TODO write without specified order
 func writeUnordered(urls *[]Action, nexts *[]Action, recommendeds *[]Action, homes *[]Action, channels *[]Action, searches *[]Action) ([]byte, error) {
-
 	urlIndex := 0
 	nextIndex := 0
 	recommendedIndex := 0
@@ -283,7 +285,7 @@ func writeUnordered(urls *[]Action, nexts *[]Action, recommendeds *[]Action, hom
 	channelIndex := 0
 	searchIndex := 0
 
-	n := len(*urls) + len(*nexts) + len(*recommendeds) + len(*homes) + len(*channels) + len(*searches)
+	n := len(*urls) + len(*nexts) + len(*recommendeds) + len(*homes)/2 + len(*channels)/2 + len(*searches)/2
 	log.Println(n)
 	actions := []Action{}
 
@@ -294,33 +296,50 @@ func writeUnordered(urls *[]Action, nexts *[]Action, recommendeds *[]Action, hom
 			if urlIndex < len(*urls) {
 				actions = append(actions, (*urls)[urlIndex])
 				urlIndex++
+				continue
 			}
+			fallthrough
 		case 1:
-			if nextIndex < len(*nexts) {
-				actions = append(actions, (*nexts)[nextIndex])
-				nextIndex++
-			}
-		case 2:
-			if recommendedIndex < len(*recommendeds) {
-				actions = append(actions, (*recommendeds)[recommendedIndex])
-				recommendedIndex++
-			}
-		case 3:
 			if homeIndex < len(*homes) {
 				actions = append(actions, (*homes)[homeIndex])
 				homeIndex++
+				actions = append(actions, (*homes)[homeIndex])
+				homeIndex++
+				continue
 			}
-		case 4:
+			fallthrough
+		case 2:
 			if channelIndex < len(*channels) {
 				actions = append(actions, (*channels)[channelIndex])
 				channelIndex++
+				actions = append(actions, (*channels)[channelIndex])
+				channelIndex++
+				continue
 			}
-		case 5:
+			fallthrough
+		case 3:
 			if searchIndex < len(*searches) {
 				actions = append(actions, (*searches)[searchIndex])
 				searchIndex++
+				actions = append(actions, (*searches)[searchIndex])
+				searchIndex++
+				continue
+			}
+			fallthrough
+		case 4:
+			if nextIndex < len(*nexts) && i != 0 {
+				actions = append(actions, (*nexts)[nextIndex])
+				nextIndex++
+				continue
+			}
+			fallthrough
+		case 5:
+			if recommendedIndex < len(*recommendeds) && i != 0 {
+				actions = append(actions, (*recommendeds)[recommendedIndex])
+				recommendedIndex++
 			}
 		}
+
 	}
 	return json.Marshal(actions)
 

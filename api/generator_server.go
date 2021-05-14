@@ -59,13 +59,13 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 	if !ok {
 		(*infos)["search"] = "0"
 	}
-	(*infos)["search"] = strings.ToLower(search)
+	(*infos)["search"] = search
 
 	stopsAt, ok := jsonData.Path("stopsAt").Data().(string)
 	if !ok {
 		(*infos)["stopsAt"] = ""
 	}
-	(*infos)["stopsAt"] = strings.ToLower(stopsAt)
+	(*infos)["stopsAt"] = stopsAt
 
 	social, ok := jsonData.Path("social").Data().(string)
 	if !ok {
