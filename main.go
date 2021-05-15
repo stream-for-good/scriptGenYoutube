@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./api"
+	"github.com/lenalbert/scriptGenYoutube/api"
 	"log"
 	"net/http"
 )

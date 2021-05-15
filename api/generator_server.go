@@ -118,11 +118,11 @@ func getDataFromJSON(jsonData *gabs.Container, infos *map[string]string) bool {
 }
 
 func getSliceFromJSON(jsonData *gabs.Container, infos *[]string, w *http.ResponseWriter) bool {
-	children := jsonData.S("order").Children()
-	/*if err != nil {
+	children, err := jsonData.S("order").Children()
+	if err != nil {
 		log.Println(err)
 		return false
-	}*/
+	}
 	for _, child := range children {
 		*infos = append(*infos, child.Data().(string))
 	}
