@@ -1,8 +1,9 @@
 # scriptGenYoutube
 
-This repo contains the code needed to generate scripts for the bots (state machine) wtching Youtube videos for the projet Stream4Good (and my M2 master thesis).
+This repo contains the code needed to generate scripts for the bots (state machine) watching Youtube videos for the projet Stream4Good (and my M2 master thesis).
 
 
+It is using Go module (to ease deployment) therefore verify your GO111MODULE is set to "on" (you can access your go env variable with `go env` and set the GO111MODULE thanks to `SETX GO111MODULE "on"`
 To use it, start the program :
 
 `go run main.go` or
