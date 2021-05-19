@@ -59,8 +59,8 @@ curl -d ' {"type": "conspi", \
    "watchRecommended": "15",\
    "stopsAt": "5",\
    "social": "like",\
-   "interactionPercent": "50",
-   \"order": ["home", "next", "search", "channel", "recommended"]}'\
+   "interactionPercent": "50",\
+   "order": ["home", "next", "search", "channel", "recommended"]}'\
    -H "Content-Type: application/json"\
    https://scriptgenyoutube.miage.dev/generate
 ```
